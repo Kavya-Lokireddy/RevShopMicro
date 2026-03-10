@@ -1,0 +1,275 @@
+.order-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.order-container h2 {
+  color: #333;
+  margin-bottom: 24px;
+  font-size: 24px;
+}
+
+.loading, .empty-state {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.error-msg {
+  background: #ffe0e0;
+  color: #d32f2f;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.success-msg {
+  background: #e6f7ea;
+  color: #1b5e20;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.order-card {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  transition: box-shadow 0.2s;
+}
+
+.order-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.order-id strong {
+  font-size: 16px;
+  color: #333;
+}
+
+.order-date {
+  display: block;
+  font-size: 13px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #d1ecf1; color: #0c5460; }
+.status-shipped { background: #cce5ff; color: #004085; }
+.status-delivered { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+.order-items {
+  margin-bottom: 16px;
+}
+
+.item-row {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #f0f0f0;
+}
+
+.item-name {
+  flex: 1;
+  font-size: 14px;
+  color: #444;
+}
+
+.item-qty {
+  color: #888;
+  margin: 0 16px;
+  font-size: 14px;
+}
+
+.item-price {
+  font-weight: 600;
+  color: #333;
+  min-width: 90px;
+  text-align: right;
+}
+
+.btn-review {
+  border: 0;
+  background: #1976d2;
+  color: #fff;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-review:hover {
+  background: #0d47a1;
+}
+
+.reviewed-pill {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.inline-review-card {
+  background: #f7f9fc;
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+  padding: 12px;
+  margin: 8px 0 10px;
+}
+
+.star-input {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.star-input label {
+  font-size: 13px;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+.stars {
+  display: flex;
+  gap: 6px;
+}
+
+.star-btn {
+  font-size: 20px;
+  color: #cbd5e0;
+  cursor: pointer;
+}
+
+.star-btn.active {
+  color: #f6b21a;
+}
+
+.inline-review-card textarea {
+  width: 100%;
+  border: 1px solid #d7dde5;
+  border-radius: 8px;
+  padding: 8px 10px;
+  resize: vertical;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.inline-review-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-submit-review,
+.btn-cancel-review {
+  border: 0;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-submit-review {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.btn-submit-review:hover {
+  background: #1b5e20;
+}
+
+.btn-cancel-review {
+  background: #eceff1;
+  color: #37474f;
+}
+
+.btn-cancel-review:hover {
+  background: #d5dce0;
+}
+
+.inline-msg {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.order-info p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.order-total {
+  text-align: right;
+}
+
+.total-label {
+  font-size: 14px;
+  color: #666;
+  margin-right: 8px;
+}
+
+.total-amount {
+  font-size: 22px;
+  font-weight: 700;
+  color: #2e7d32;
+}
+
+.order-actions {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #f0f0f0;
+  text-align: right;
+}
+
+.btn-cancel {
+  background: #ef5350;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #c62828;
+}

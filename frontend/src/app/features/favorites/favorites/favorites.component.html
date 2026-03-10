@@ -1,0 +1,29 @@
+<div class="favorites-container">
+    <h2>❤️ My Favorites</h2>
+
+    <div *ngIf="loading" class="loading">Loading favorites...</div>
+
+    <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+
+    <div *ngIf="!loading && favorites.length === 0" class="empty-state">
+        <p>💔 No favorite products yet. Start browsing and add some!</p>
+    </div>
+
+    <div class="favorites-grid">
+        <div class="fav-card" *ngFor="let fav of favorites">
+            <div class="fav-image">
+                <img
+                    [src]="fav.productImage || 'https://via.placeholder.com/200x150?text=' + (fav.productName || 'Favorite')"
+                    [alt]="fav.productName">
+            </div>
+            <div class="fav-info">
+                <h4>{{ fav.productName }}</h4>
+                <p class="fav-price">₹{{ fav.productPrice | number:'1.2-2' }}</p>
+                <p class="fav-added">Added {{ fav.addedAt | date:'mediumDate' }}</p>
+            </div>
+            <button class="btn-remove" (click)="removeFavorite(fav.productId)">
+                ❌ Remove
+            </button>
+        </div>
+    </div>
+</div>

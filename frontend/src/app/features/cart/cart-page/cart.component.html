@@ -1,0 +1,133 @@
+<div class="cart-container">
+
+  <h1 class="cart-title">🛒 My Shopping Cart</h1>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="cart-loading">
+    <div class="spinner"></div>
+    <p>Loading your cart...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error" class="cart-error">
+    <span class="error-icon">⚠️</span>
+    <p>{{ error }}</p>
+    <button class="btn-retry" (click)="loadCart()">Try Again</button>
+  </div>
+
+  <!-- Empty Cart -->
+  <div *ngIf="!loading && !error && isCartEmpty" class="cart-empty">
+    <div class="empty-icon">🛒</div>
+    <h2>Your cart is empty</h2>
+    <p>Looks like you haven't added any products yet.</p>
+    <a routerLink="/buyer/dashboard" class="btn-continue-shopping">Continue Shopping</a>
+  </div>
+
+  <!-- Cart Items -->
+  <div *ngIf="!loading && !error && !isCartEmpty" class="cart-content">
+
+    <div class="cart-items">
+      <div
+        *ngFor="let item of cart!.items"
+        class="cart-item"
+        [class.updating]="updatingItemId === item.cartItemId">
+
+        <!-- Product Info -->
+        <div class="item-info">
+          <h3 class="item-name">{{ item.productName }}</h3>
+          <p class="item-description">{{ item.productDescription }}</p>
+          <div class="item-pricing">
+            <span class="item-price">₹{{ item.price | number:'1.2-2' }}</span>
+            <span *ngIf="item.mrp && item.mrp > item.price" class="item-mrp">
+              ₹{{ item.mrp | number:'1.2-2' }}
+            </span>
+            <span *ngIf="item.discountPercentage && item.discountPercentage > 0" class="item-discount">
+              {{ item.discountPercentage | number:'1.0-0' }}% OFF
+            </span>
+          </div>
+          <p class="item-stock" [class.low-stock]="item.availableStock <= 5">
+            <span *ngIf="item.availableStock > 5">In Stock</span>
+            <span *ngIf="item.availableStock <= 5 && item.availableStock > 0">
+              Only {{ item.availableStock }} left!
+            </span>
+            <span *ngIf="item.availableStock === 0" class="out-of-stock">Out of Stock</span>
+          </p>
+        </div>
+
+        <!-- Quantity Controls -->
+        <div class="item-quantity">
+          <button
+            class="btn-qty"
+            (click)="decreaseQuantity(item)"
+            [disabled]="item.quantity <= 1 || updatingItemId === item.cartItemId">
+            −
+          </button>
+          <input
+            type="number"
+            class="qty-input"
+            [value]="item.quantity"
+            [min]="1"
+            [max]="item.availableStock"
+            (change)="onQuantityInput(item, $event)"
+            [disabled]="updatingItemId === item.cartItemId" />
+          <button
+            class="btn-qty"
+            (click)="increaseQuantity(item)"
+            [disabled]="item.quantity >= item.availableStock || updatingItemId === item.cartItemId">
+            +
+          </button>
+        </div>
+
+        <!-- Subtotal -->
+        <div class="item-subtotal">
+          <span class="subtotal-label">Subtotal</span>
+          <span class="subtotal-value">₹{{ item.subtotal | number:'1.2-2' }}</span>
+        </div>
+
+        <!-- Remove Button -->
+        <button
+          class="btn-remove"
+          (click)="removeItem(item.cartItemId)"
+          [disabled]="updatingItemId === item.cartItemId"
+          title="Remove from cart">
+          🗑️ Remove
+        </button>
+      </div>
+    </div>
+
+    <!-- Cart Summary -->
+    <div class="cart-summary">
+      <h2 class="summary-title">Order Summary</h2>
+
+      <div class="summary-row">
+        <span>Items ({{ cart!.totalItems }})</span>
+        <span>₹{{ cart!.totalPrice | number:'1.2-2' }}</span>
+      </div>
+
+      <div class="summary-row">
+        <span>Shipping</span>
+        <span class="free-shipping">FREE</span>
+      </div>
+
+      <hr class="summary-divider" />
+
+      <div class="summary-row total-row">
+        <span>Total</span>
+        <span class="total-value">₹{{ cart!.totalPrice | number:'1.2-2' }}</span>
+      </div>
+
+      <a
+        routerLink="/checkout"
+        [queryParams]="{ amount: cart!.totalPrice, quantity: cart!.totalItems }"
+        class="btn-checkout">
+        Proceed to Checkout
+      </a>
+
+      <button class="btn-clear-cart" (click)="clearCart()">Clear Cart</button>
+
+      <a routerLink="/buyer/dashboard" class="btn-continue">← Continue Shopping</a>
+    </div>
+
+  </div>
+
+</div>

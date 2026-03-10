@@ -1,0 +1,80 @@
+<div class="order-container">
+  <h2>📦 My Orders</h2>
+
+  <div *ngIf="loading" class="loading">Loading orders...</div>
+
+  <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+  <div *ngIf="reviewSuccess" class="success-msg">{{ reviewSuccess }}</div>
+
+  <div *ngIf="!loading && orders.length === 0" class="empty-state">
+    <p>🛒 You haven't placed any orders yet.</p>
+  </div>
+
+  <div class="order-card" *ngFor="let order of orders">
+    <div class="order-header">
+      <div class="order-id">
+        <strong>Order #{{ order.orderId }}</strong>
+        <span class="order-date">{{ order.orderDate | date:'medium' }}</span>
+      </div>
+      <span class="status-badge" [ngClass]="getStatusClass(order.status)">
+        {{ order.status }}
+      </span>
+    </div>
+
+    <div class="order-items">
+      <ng-container *ngFor="let item of order.items">
+        <div class="item-row">
+          <span class="item-name">
+            <a [routerLink]="['/buyer/product', item.productId]">{{ item.productName }}</a>
+          </span>
+          <span class="item-qty">x{{ item.quantity }}</span>
+          <span class="item-price-label">Price:</span>
+          <span class="item-price">₹{{ item.priceAtPurchase | number:'1.2-2' }}</span>
+          <span class="item-price-label">Subtotal:</span>
+          <span class="item-price">₹{{ item.subtotal | number:'1.2-2' }}</span>
+
+          <button class="btn-review" *ngIf="canReview(order, item.productId)"
+            (click)="openReviewForm(order.orderId, item.productId)">
+            Rate & Review
+          </button>
+          <span class="reviewed-pill" *ngIf="reviewedProductIds.has(item.productId)">Reviewed</span>
+        </div>
+
+        <div class="inline-review-card" *ngIf="isReviewFormOpen(order.orderId, item.productId)">
+          <div class="star-input">
+            <label>Your Rating</label>
+            <div class="stars">
+              <span *ngFor="let star of [1,2,3,4,5]" class="star-btn" [class.active]="star <= reviewDraft.rating"
+                (click)="setRating(star)">★</span>
+            </div>
+          </div>
+
+          <textarea [(ngModel)]="reviewDraft.comment" rows="3"
+            placeholder="Share your experience (optional)"></textarea>
+
+          <div class="inline-review-actions">
+            <button class="btn-submit-review" (click)="submitReview(order.orderId, item)">Submit</button>
+            <button class="btn-cancel-review" (click)="closeReviewForm()">Cancel</button>
+          </div>
+
+          <div *ngIf="reviewError" class="error-msg inline-msg">{{ reviewError }}</div>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="order-footer">
+      <div class="order-info">
+        <p><strong>Shipping:</strong> {{ order.shippingAddress }}</p>
+        <p><strong>Payment:</strong> {{ order.paymentMethod }}</p>
+      </div>
+      <div class="order-total">
+        <span class="total-label">Total:</span>
+        <span class="total-amount">₹{{ order.totalAmount | number:'1.2-2' }}</span>
+      </div>
+    </div>
+
+    <div class="order-actions" *ngIf="order.status === 'PENDING' || order.status === 'CONFIRMED'">
+      <button class="btn-cancel" (click)="cancelOrder(order.orderId)">Cancel Order</button>
+    </div>
+  </div>
+</div>

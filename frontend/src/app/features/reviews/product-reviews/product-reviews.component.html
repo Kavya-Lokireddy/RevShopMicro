@@ -1,0 +1,57 @@
+<div class="reviews-container">
+    <div class="reviews-header">
+        <h3>⭐ Reviews & Ratings</h3>
+        <div class="avg-rating" *ngIf="averageRating > 0">
+            <span class="stars">
+                <span *ngFor="let s of getStars(averageRating)">★</span>
+                <span class="empty" *ngFor="let s of getEmptyStars(averageRating)">★</span>
+            </span>
+            <span class="avg-number">{{ averageRating | number:'1.1-1' }} / 5</span>
+            <span class="review-count">({{ reviews.length }} reviews)</span>
+        </div>
+    </div>
+
+    <button class="btn-write-review" (click)="toggleForm()">
+        {{ showForm ? 'Cancel' : '✍️ Write a Review' }}
+    </button>
+
+    <div *ngIf="errorMessage" class="error-msg">{{ errorMessage }}</div>
+    <div *ngIf="successMessage" class="success-msg">{{ successMessage }}</div>
+
+    <!-- Review Form -->
+    <div class="review-form" *ngIf="showForm">
+        <div class="star-input">
+            <label>Your Rating:</label>
+            <div class="star-selector">
+                <span *ngFor="let star of [1,2,3,4,5]" class="star-btn" [class.active]="star <= newReview.rating"
+                    (click)="setRating(star)">★</span>
+            </div>
+        </div>
+        <textarea [(ngModel)]="newReview.comment" placeholder="Write your review here..." rows="4"></textarea>
+        <button class="btn-submit" (click)="submitReview()">Submit Review</button>
+    </div>
+
+    <!-- Reviews List -->
+    <div *ngIf="loading" class="loading">Loading reviews...</div>
+
+    <div *ngIf="!loading && reviews.length === 0" class="empty-state">
+        No reviews yet. Be the first!
+    </div>
+
+    <div class="review-card" *ngFor="let review of reviews">
+        <div class="review-top">
+            <div>
+                <span class="reviewer-name">{{ review.buyer.name }}</span>
+                <span class="review-date">{{ review.createdAt | date:'mediumDate' }}</span>
+            </div>
+            <div class="review-stars">
+                <span *ngFor="let s of getStars(review.rating)">★</span>
+                <span class="empty" *ngFor="let s of getEmptyStars(review.rating)">★</span>
+            </div>
+        </div>
+        <p class="review-comment">{{ review.comment }}</p>
+        <button class="btn-delete" *ngIf="review.buyer.id === buyerId" (click)="deleteReview(review.id)">
+            🗑️ Delete
+        </button>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+<section class="payment-shell">
+  <div class="payment-card">
+    <h2>Payment</h2>
+    <p class="muted">Complete payment to confirm your order.</p>
+
+    <div class="order-chip">
+      Order ID: <strong>{{ orderId || 'N/A' }}</strong>
+    </div>
+
+    <label for="paymentMethod">Payment Method</label>
+    <select id="paymentMethod" [(ngModel)]="paymentMethod">
+      <option value="COD">COD</option>
+      <option value="CREDIT_CARD">CREDIT_CARD</option>
+      <option value="DEBIT_CARD">DEBIT_CARD</option>
+    </select>
+
+    <p class="status" [class.error]="isError" *ngIf="message">{{ message }}</p>
+
+    <button class="primary-btn" (click)="pay()" [disabled]="isProcessing">
+      {{ isProcessing ? 'Processing...' : 'Pay Now' }}
+    </button>
+  </div>
+</section>

@@ -1,0 +1,29 @@
+<div class="product-details-container animate-fade">
+  <div *ngIf="!product" class="loading">
+    Loading product details...
+  </div>
+
+  <div *ngIf="product" class="product-info-card glass-panel">
+    <div class="product-image"></div>
+    <div class="product-details">
+      <h2>{{product.name}}</h2>
+      <p>{{product.description}}</p>
+
+      <div class="meta-info">
+        <span>📦 Quantity: {{product.quantity}}</span>
+        <span>⭐ Rating: {{product.rating | number:'1.1-1'}}</span>
+      </div>
+
+      <div class="price">₹ {{product.price | number:'1.2-2'}}</div>
+      <div class="button-group">
+        <button class="btn-primary" (click)="addToCart()">Add to Cart</button>
+        <button class="btn-secondary" (click)="toggleFavorite()" [class.active]="isFavorite">
+          {{ isFavorite ? '❤️ In Favorites' : '🤍 Add to Favorites' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <app-product-reviews *ngIf="product" [productId]="product.id"></app-product-reviews>
+</div>

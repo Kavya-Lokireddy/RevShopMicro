@@ -1,0 +1,175 @@
+<section class="seller-dashboard">
+  <div class="dashboard-header">
+    <div>
+      <h2>Seller Dashboard</h2>
+      <p>Manage your catalog, pricing, and stock in one place.</p>
+    </div>
+    <button class="btn-premium btn-primary add-product-btn" (click)="clear()">Add Product</button>
+  </div>
+
+  <!-- Dashboard Overview Widgets -->
+  <div class="dashboard-widgets">
+    <!-- Total Sales -->
+    <div class="widget-card glass-panel metric-card">
+      <div class="metric-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="feather feather-dollar-sign">
+          <line x1="12" y1="1" x2="12" y2="23"></line>
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+        </svg>
+      </div>
+      <div class="metric-info">
+        <h3>Total Sales</h3>
+        <p class="metric-value">₹{{ totalSales | number:'1.0-0' }}</p>
+      </div>
+    </div>
+
+    <!-- Total Orders -->
+    <div class="widget-card glass-panel metric-card">
+      <div class="metric-icon blue">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="feather feather-shopping-bag">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 0 1-8 0"></path>
+        </svg>
+      </div>
+      <div class="metric-info">
+        <h3>Total Orders</h3>
+        <p class="metric-value">{{ totalOrders }}</p>
+      </div>
+    </div>
+
+    <!-- Inventory / Low Stock -->
+    <div class="widget-card glass-panel metric-card" [class.alert]="lowStockItems.length > 0">
+      <div class="metric-icon red">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <div class="metric-info">
+        <h3>Low Stock Alerts</h3>
+        <p class="metric-value" [class.red-text]="lowStockItems.length > 0">{{ lowStockItems.length }} Items</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Tabs -->
+  <div class="dashboard-tabs">
+    <button class="tab-btn" [class.active]="activeTab === 'PRODUCTS'" (click)="setTab('PRODUCTS')">My Catalog</button>
+    <button class="tab-btn" [class.active]="activeTab === 'ORDERS'" (click)="setTab('ORDERS')">
+      Manage Orders <span class="badge" *ngIf="totalOrders > 0">{{ totalOrders }}</span>
+    </button>
+    <button class="tab-btn" [class.active]="activeTab === 'REVIEWS'" (click)="setTab('REVIEWS')">
+      Customer Reviews <span class="badge" *ngIf="totalReviews > 0">{{ totalReviews }}</span>
+    </button>
+  </div>
+
+  <!-- PRODUCTS TAB -->
+  <div *ngIf="activeTab === 'PRODUCTS'" class="tab-content animate-fade">
+    <app-product-form [product]="selectedProduct" (onSaved)="onSaved()">
+    </app-product-form>
+
+    <app-product-list [products]="products" (editProduct)="edit($event)" (productDeleted)="loadProducts()">
+    </app-product-list>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div *ngIf="activeTab === 'ORDERS'" class="tab-content animate-fade">
+    <div class="orders-container glass-panel">
+      <h3>Customer Orders</h3>
+      <div class="table-responsive" *ngIf="sellerOrders.length > 0; else noOrders">
+        <table class="modern-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of sellerOrders">
+              <td>#{{ order.orderId }}</td>
+              <td>
+                <div class="customer-info">
+                  <strong>{{ order.buyerName }}</strong>
+                  <span *ngIf="order.phoneNumber">📞 {{ order.phoneNumber }}</span>
+                </div>
+              </td>
+              <td>{{ order.orderDate | date:'mediumDate' }}</td>
+              <td>
+                <ul class="item-list">
+                  <li *ngFor="let item of order.items">
+                    {{ item.quantity }}x {{ item.productName }}
+                  </li>
+                </ul>
+              </td>
+              <td>₹{{ order.totalAmount }}</td>
+              <td>
+                <select class="status-select" [ngClass]="order.status.toLowerCase()" [ngModel]="order.status"
+                  (ngModelChange)="updateOrderStatus(order.orderId, $event)">
+                  <option value="PENDING">Pending</option>
+                  <option value="CONFIRMED">Confirmed</option>
+                  <option value="SHIPPED">Shipped</option>
+                  <option value="DELIVERED">Delivered</option>
+                  <option value="CANCELLED">Cancelled</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noOrders>
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="feather feather-package">
+            <line x1="16.5" y1="9.4" x2="7.5" y2="4.21"></line>
+            <path
+              d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z">
+            </path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+          <p>No orders place yet. Keep marketing your products!</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <!-- REVIEWS TAB -->
+  <div *ngIf="activeTab === 'REVIEWS'" class="tab-content animate-fade">
+    <div class="orders-container glass-panel">
+      <h3>Customer Reviews</h3>
+      <div *ngIf="sellerReviews.length > 0; else noReviews">
+        <div class="review-card" *ngFor="let review of sellerReviews">
+          <div class="review-top">
+            <div class="review-meta">
+              <strong>{{ review.product.name }}</strong>
+              <span>by {{ review.buyer.name || 'Customer' }}</span>
+            </div>
+            <div class="review-stars">
+              <span *ngFor="let s of [1,2,3,4,5]" [class.dim]="s > review.rating">★</span>
+            </div>
+          </div>
+          <p class="review-comment">{{ review.comment || 'No comment provided.' }}</p>
+          <span class="review-date">{{ review.createdAt | date:'medium' }}</span>
+        </div>
+      </div>
+      <ng-template #noReviews>
+        <div class="empty-state">
+          <p>No customer reviews yet. You will see them here after buyers submit ratings.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+</section>

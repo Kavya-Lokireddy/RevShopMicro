@@ -1,0 +1,123 @@
+:host {
+  --bg: #f5f7fb;
+  --panel: #ffffff;
+  --text: #1e293b;
+  --muted: #64748b;
+  --brand: #6d5efc;
+  --accent: #f04ca2;
+  --border: #e2e8f0;
+  --shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  font-family: "Poppins", "Segoe UI", sans-serif;
+  color: var(--text);
+  display: block;
+}
+
+.payment-shell {
+  min-height: calc(100vh - 180px);
+  padding: 48px 20px;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(109, 94, 252, 0.14), transparent 42%),
+    radial-gradient(circle at 90% 20%, rgba(240, 76, 162, 0.12), transparent 40%),
+    var(--bg);
+}
+
+.payment-card {
+  max-width: 520px;
+  margin: 0 auto;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+
+h2 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.muted {
+  margin: 6px 0 20px;
+  color: var(--muted);
+}
+
+.order-chip {
+  margin: 0 0 18px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(109, 94, 252, 0.08);
+  border: 1px solid rgba(109, 94, 252, 0.24);
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.order-chip strong {
+  color: var(--text);
+}
+
+label {
+  display: block;
+  margin: 8px 0;
+  font-weight: 600;
+}
+
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text);
+  font-size: 0.95rem;
+  box-sizing: border-box;
+}
+
+select:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(109, 94, 252, 0.2);
+}
+
+.status {
+  margin: 12px 0 0;
+  color: #047857;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.status.error {
+  color: #b91c1c;
+}
+
+.primary-btn {
+  margin-top: 18px;
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 18px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(90deg, var(--brand), var(--accent));
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.primary-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.primary-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+  .payment-shell {
+    padding: 30px 14px;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+  }
+}

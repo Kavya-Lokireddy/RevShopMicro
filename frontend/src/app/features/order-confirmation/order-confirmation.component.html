@@ -1,0 +1,40 @@
+<section class="confirmation-shell">
+  <div class="confirmation-card">
+
+    <!-- Success Icon -->
+    <div class="success-icon-wrapper">
+      <div class="success-circle">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#fff"
+          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <h2>Payment Successful!</h2>
+    <p class="subtitle">Your order has been placed and confirmed.</p>
+
+    <!-- Order Details -->
+    <div class="details-box">
+      <div class="detail-row">
+        <span class="label">Order ID</span>
+        <span class="value">#{{ orderId }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Payment Method</span>
+        <span class="value">{{ paymentIcon }} {{ paymentMethodLabel }}</span>
+      </div>
+      <div class="detail-row">
+        <span class="label">Status</span>
+        <span class="value status-confirmed">✅ Confirmed</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn-primary" (click)="goToOrders()">View My Orders</button>
+      <button class="btn-secondary" (click)="continueShopping()">Continue Shopping</button>
+    </div>
+
+  </div>
+</section>

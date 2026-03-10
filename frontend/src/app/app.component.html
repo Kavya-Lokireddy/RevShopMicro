@@ -1,0 +1,116 @@
+<!-- Modern Navigation Bar -->
+<nav class="navbar animate-fade">
+    <div class="container nav-content">
+        <div class="logo" routerLink="/">
+            <span class="logo-accent">Rev</span>Shop
+        </div>
+
+        <div class="nav-links">
+            <ng-container *ngIf="currentUser && currentUser.role !== 'SELLER'">
+                <a routerLink="/buyer/dashboard" routerLinkActive="active"
+                    [routerLinkActiveOptions]="{exact: true}">Products</a>
+                <a routerLink="/favorites" routerLinkActive="active">Favorites</a>
+                <a routerLink="/orders" routerLinkActive="active">Orders</a>
+            </ng-container>
+
+            <!-- Seller Tools -->
+            <ng-container *ngIf="currentUser?.role === 'SELLER'">
+                <a routerLink="/seller/dashboard" routerLinkActive="active" class="seller-link">Dashboard</a>
+            </ng-container>
+        </div>
+
+        <div class="nav-actions">
+            <!-- Search Icon with Expandable Input (Buyer Only) -->
+            <div class="search-trigger" [class.active]="searchOpen"
+                *ngIf="currentUser && currentUser.role !== 'SELLER'">
+                <input *ngIf="searchOpen" class="search-input" [(ngModel)]="searchQuery"
+                    placeholder="Search products..." (keydown.enter)="doSearch()" #searchInput />
+                <button class="search-btn" (click)="toggleSearch()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                </button>
+            </div>
+            <!-- Cart Icon with Badge (Buyer Only) -->
+            <div class="cart-trigger" routerLink="/cart" *ngIf="currentUser && currentUser.role !== 'SELLER'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+                    <path d="M3 6h18" />
+                    <path d="M16 10a4 4 0 0 1-8 0" />
+                </svg>
+                <span class="cart-badge" *ngIf="(cartService.cart$ | async) as cart">{{ cart.totalItems }}</span>
+            </div>
+
+            <!-- Notifications Icon with Badge -->
+            <div class="notification-trigger" (click)="toggleNotifications()" *ngIf="currentUser">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                </svg>
+                <span class="notification-badge" *ngIf="unreadCount > 0">{{ unreadCount }}</span>
+
+                <!-- Notifications Dropdown -->
+                <div class="notification-dropdown" *ngIf="showNotifications" (click)="$event.stopPropagation()">
+                    <div class="notification-header">
+                        <h4>Notifications</h4>
+                    </div>
+                    <div class="notification-list" *ngIf="notifications.length > 0; else noNotifications">
+                        <div class="notification-item" *ngFor="let n of notifications" [class.unread]="!n.read"
+                            (click)="markAsRead(n)">
+                            <p>{{ n.message }}</p>
+                            <span class="time">{{ n.createdAt | date:'short' }}</span>
+                        </div>
+                    </div>
+                    <ng-template #noNotifications>
+                        <div class="no-notifications">
+                            <p>You have no notifications.</p>
+                        </div>
+                    </ng-template>
+                </div>
+            </div>
+
+            <button *ngIf="!currentUser" routerLink="/login" class="btn-premium btn-primary">Sign In</button>
+            <button *ngIf="currentUser" (click)="logout()" class="btn-premium btn-secondary">Sign Out</button>
+        </div>
+    </div>
+</nav>
+
+<!-- Main Content Area -->
+<main class="main-wrapper">
+    <router-outlet></router-outlet>
+</main>
+
+<!-- Modern Footer -->
+<footer class="footer" *ngIf="!isAuthRoute">
+    <div class="container footer-content">
+        <div class="footer-brand">
+            <div class="logo smaller">
+                <span class="logo-accent">Rev</span>Shop
+            </div>
+            <p>Premium shopping experience designed for the next generation.</p>
+        </div>
+        <div class="footer-links">
+            <div class="link-group">
+                <h4>Platform</h4>
+                <a routerLink="/buyer/dashboard">Shop All</a>
+                <a routerLink="/seller/dashboard">Sell on RevShop</a>
+                <a href="#">About Us</a>
+            </div>
+            <div class="link-group">
+                <h4>Support</h4>
+                <a href="#">Help Center</a>
+                <a href="#">Shipping</a>
+                <a href="#">Returns</a>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="container">
+            <p>&copy; 2026 RevShop P2. All rights reserved.</p>
+        </div>
+    </div>
+</footer>

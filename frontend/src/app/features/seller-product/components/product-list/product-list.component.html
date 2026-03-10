@@ -1,0 +1,38 @@
+<div class="product-list-card">
+  <h2>Product Management</h2>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr style="background-color: #f0f0f0;">
+          <th>Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>MRP</th>
+          <th>Quantity</th>
+          <th>Discount %</th>
+          <th>Stock Threshold</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of products">
+          <td>{{ p.name }}</td>
+          <td>{{ p.categoryName || p.category?.name || p.category }}</td>
+          <td>{{ p.price }}</td>
+          <td>{{ p.mrp }}</td>
+          <td>{{ p.quantity }}</td>
+          <td>{{ p.discountPercentage }}</td>
+          <td>{{ p.stockThreshold }}</td>
+          <td class="actions">
+            <button class="edit-btn" (click)="edit(p)">Edit</button>
+            <button class="delete-btn" (click)="delete(p.id!)">Delete</button>
+          </td>
+        </tr>
+        <tr *ngIf="products.length === 0">
+          <td class="empty-row" colspan="8">No products available</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

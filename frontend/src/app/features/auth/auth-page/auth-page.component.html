@@ -1,0 +1,152 @@
+<div class="auth-container">
+
+  <!-- Background -->
+  <div class="background"></div>
+
+  <!-- Card -->
+  <div class="auth-card">
+
+    <!-- Tabs -->
+    <div class="tabs">
+
+      <div class="tab" [class.active]="isLogin" (click)="switchTab(true)">
+        Login
+      </div>
+
+      <div class="tab" [class.active]="!isLogin" (click)="switchTab(false)">
+        Register
+      </div>
+
+    </div>
+
+
+    <!-- ================= LOGIN FORM ================= -->
+
+    <form *ngIf="isLogin" [formGroup]="loginForm" (ngSubmit)="login()">
+
+      <h2>Welcome Back</h2>
+
+      <!-- Success -->
+      <div class="success" *ngIf="message">
+        {{message}}
+      </div>
+
+      <!-- Error -->
+      <div class="error" *ngIf="error">
+        {{error}}
+      </div>
+
+      <!-- Email -->
+      <input type="email" placeholder="Enter your email" formControlName="email">
+
+      <div class="validation" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
+        <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
+        <span *ngIf="loginForm.get('email')?.errors?.['email'] || loginForm.get('email')?.errors?.['pattern']">Please
+          enter a valid email address (e.g. user@gmail.com)</span>
+      </div>
+
+
+      <!-- Password -->
+      <input type="password" placeholder="Enter your password" formControlName="password">
+
+      <div class="validation" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+        <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
+        <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters
+          long</span>
+      </div>
+
+
+      <!-- Forgot Password (CORRECT PLACE) -->
+      <div class="forgot-container">
+        <a routerLink="/forgot-password" class="forgot-link">
+          Forgot Password?
+        </a>
+      </div>
+
+
+      <!-- Login Button -->
+      <button type="submit">
+        Login
+      </button>
+
+    </form>
+
+
+
+    <!-- ================= REGISTER FORM ================= -->
+
+    <form *ngIf="!isLogin" [formGroup]="registerForm" (ngSubmit)="register()">
+
+      <h2>Create Account</h2>
+
+      <!-- Success -->
+      <div class="success" *ngIf="message">
+        {{message}}
+      </div>
+
+      <!-- Error -->
+      <div class="error" *ngIf="error">
+        {{error}}
+      </div>
+
+
+      <!-- Name -->
+      <input type="text" placeholder="Enter your name" formControlName="name">
+
+      <div class="validation" *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid">
+        <span *ngIf="registerForm.get('name')?.errors?.['required']">Name is required</span>
+        <span *ngIf="registerForm.get('name')?.errors?.['minlength']">Name must be at least 3 characters long</span>
+      </div>
+
+
+      <!-- Email -->
+      <input type="email" placeholder="Enter your email" formControlName="email">
+
+      <div class="validation" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
+        <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
+        <span
+          *ngIf="registerForm.get('email')?.errors?.['email'] || registerForm.get('email')?.errors?.['pattern']">Please
+          enter a valid email address (e.g. user@gmail.com)</span>
+      </div>
+
+
+      <!-- Password -->
+      <input type="password" placeholder="Enter your password" formControlName="password">
+
+      <div class="validation" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
+        <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
+        <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters
+          long</span>
+      </div>
+
+
+      <!-- Role -->
+      <select formControlName="role">
+
+        <option value="BUYER">
+          Buyer
+        </option>
+
+        <option value="SELLER">
+          Seller
+        </option>
+
+      </select>
+
+
+      <!-- Business Name (only for seller) -->
+      <input *ngIf="registerForm.get('role')?.value === 'SELLER'" type="text" placeholder="Enter business name"
+        formControlName="businessName">
+
+
+      <!-- Register Button -->
+      <button type="submit">
+        Register
+      </button>
+
+    </form>
+
+
+  </div>
+
+</div>

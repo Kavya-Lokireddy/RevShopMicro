@@ -1,0 +1,8 @@
+<input [(ngModel)]="keyword"
+       (keyup)="search()"
+       placeholder="Search products">
+
+<div *ngFor="let p of results">
+  <h3>{{p.name}}</h3>
+  <p>{{p.description}}</p>
+</div>
