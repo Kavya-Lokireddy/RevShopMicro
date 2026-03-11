@@ -9,6 +9,8 @@ import com.revshop.cart.model.CartItem;
 import com.revshop.cart.repository.CartItemRepository;
 import com.revshop.cart.repository.CartRepository;
 import com.revshop.cart.service.CartService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class CartServiceImpl implements CartService {
+
+    private static final Logger log = LoggerFactory.getLogger(CartServiceImpl.class);
 
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
@@ -34,6 +38,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse addToCart(Long userId, AddToCartRequest request) {
+        log.info("Adding product to cart for userId: {}, productId: {}, quantity: {}", userId, request.getProductId(), request.getQuantity());
         // Get product details from product-service
         ProductDto product = productServiceClient.getProduct(request.getProductId());
 
@@ -71,12 +76,14 @@ public class CartServiceImpl implements CartService {
         }
 
         Cart savedCart = cartRepository.save(cart);
+        log.info("Product added to cart successfully for userId: {}", userId);
         return mapToResponse(savedCart);
     }
 
     @Override
     @Transactional
     public CartResponse updateCartItem(Long userId, Long itemId, UpdateCartRequest request) {
+        log.info("Updating cart item for userId: {}, itemId: {}, newQuantity: {}", userId, itemId, request.getQuantity());
         Cart cart = getCartForUser(userId);
         CartItem cartItem = findCartItemById(cart, itemId);
 
@@ -92,6 +99,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartResponse removeFromCart(Long userId, Long itemId) {
+        log.info("Removing item from cart for userId: {}, itemId: {}", userId, itemId);
         Cart cart = getCartForUser(userId);
         CartItem cartItem = findCartItemById(cart, itemId);
 
@@ -104,6 +112,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartResponse getCart(Long userId) {
+        log.info("Getting cart for userId: {}", userId);
         return cartRepository.findByUserId(userId)
                 .map(this::mapToResponse)
                 .orElseGet(this::emptyCartResponse);
@@ -112,6 +121,7 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public void clearCart(Long userId) {
+        log.info("Clearing cart for userId: {}", userId);
         Cart cart = getCartForUser(userId);
         cart.getItems().clear();
         cartRepository.save(cart);

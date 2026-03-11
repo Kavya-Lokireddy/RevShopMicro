@@ -8,6 +8,8 @@ import com.revshop.auth.exception.InvalidCredentialsException;
 import com.revshop.auth.exception.ResourceNotFoundException;
 import com.revshop.auth.repository.UserRepository;
 import com.revshop.auth.service.AuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,8 @@ import java.util.UUID;
  */
 @Service
 public class AuthServiceImpl implements AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -34,8 +38,10 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String register(RegisterRequest request) {
+        log.info("Registering new user with email: {}, role: {}", request.getEmail(), request.getRole());
         // Check if email already exists
         if (userRepository.existsByEmail(request.getEmail())) {
+            log.warn("Registration failed - duplicate email: {}", request.getEmail());
             throw new DuplicateEmailException("Email already exists: " + request.getEmail());
         }
 
@@ -53,22 +59,29 @@ public class AuthServiceImpl implements AuthService {
         }
 
         userRepository.save(user);
+        log.info("User registered successfully: {}", request.getEmail());
         return "User registered successfully";
     }
 
     @Override
     public AuthResponse login(LoginRequest request) {
+        log.info("Login attempt for email: {}", request.getEmail());
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password"));
+                .orElseThrow(() -> {
+                    log.warn("Login failed - invalid email: {}", request.getEmail());
+                    return new InvalidCredentialsException("Invalid email or password");
+                });
 
         // Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("Login failed - wrong password for email: {}", request.getEmail());
             throw new InvalidCredentialsException("Invalid email or password");
         }
 
         // Check if user is active
         if (!user.getActive()) {
+            log.warn("Login failed - deactivated account for email: {}", request.getEmail());
             throw new InvalidCredentialsException("Account is deactivated");
         }
 
@@ -76,14 +89,19 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name(), user.getId());
 
         // Return response with token and user details
+        log.info("User logged in successfully: {}", request.getEmail());
         return new AuthResponse(token, user.getId(), user.getName(), user.getEmail(), user.getRole());
     }
 
     @Override
     public String forgotPassword(ForgotPasswordRequest request) {
+        log.info("Forgot password requested for email: {}", request.getEmail());
         // Find user by email
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
+                .orElseThrow(() -> {
+                    log.warn("Forgot password - user not found for email: {}", request.getEmail());
+                    return new ResourceNotFoundException("User not found with email: " + request.getEmail());
+                });
 
         // Generate reset token
         String resetToken = UUID.randomUUID().toString();
@@ -116,6 +134,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public UserValidationResponse validateToken(String token) {
+        log.debug("Validating JWT token");
         try {
             // Validate token and extract claims
             if (jwtService.validateToken(token)) {
@@ -135,6 +154,7 @@ public class AuthServiceImpl implements AuthService {
             }
             return new UserValidationResponse(null, null, null, false);
         } catch (Exception e) {
+            log.warn("Token validation failed: {}", e.getMessage());
             return new UserValidationResponse(null, null, null, false);
         }
     }

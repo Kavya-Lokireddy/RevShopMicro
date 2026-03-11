@@ -12,6 +12,8 @@ import com.revshop.order.repository.OrderRepository;
 import com.revshop.order.repository.ReviewRepository;
 import com.revshop.order.service.NotificationService;
 import com.revshop.order.service.ReviewService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class ReviewServiceImpl implements ReviewService {
+
+    private static final Logger log = LoggerFactory.getLogger(ReviewServiceImpl.class);
 
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
@@ -36,11 +40,16 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public ReviewResponse addReview(Long userId, ReviewRequest request) {
+        log.info("Adding review for userId: {}, productId: {}, orderId: {}", userId, request.getProductId(), request.getOrderId());
         // Verify that the user purchased this product in this order
         Order order = orderRepository.findById(request.getOrderId())
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + request.getOrderId()));
+                .orElseThrow(() -> {
+                    log.warn("Order not found with id: {} for review", request.getOrderId());
+                    return new OrderNotFoundException("Order not found with id: " + request.getOrderId());
+                });
 
         if (!order.getUserId().equals(userId)) {
+            log.warn("Unauthorized review attempt: userId {} trying to review order owned by userId {}", userId, order.getUserId());
             throw new UnauthorizedException("You can only review your own purchases");
         }
 
@@ -69,6 +78,7 @@ public class ReviewServiceImpl implements ReviewService {
         review.setComment(request.getComment());
 
         Review savedReview = reviewRepository.save(review);
+        log.info("Review saved successfully with id: {} for productId: {}", savedReview.getId(), request.getProductId());
 
         // Update product rating via Feign client
         Double averageRating = getAverageRating(request.getProductId());
@@ -76,7 +86,7 @@ public class ReviewServiceImpl implements ReviewService {
             productServiceClient.updateProductRating(request.getProductId(), averageRating);
         } catch (Exception e) {
             // Log error but don't fail the review creation
-            System.err.println("Failed to update product rating: " + e.getMessage());
+            log.error("Failed to update product rating for productId: {}: {}", request.getProductId(), e.getMessage());
         }
 
         // Notify seller about the new review
@@ -99,6 +109,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewResponse> getProductReviews(Long productId) {
+        log.info("Fetching reviews for productId: {}", productId);
         return reviewRepository.findByProductIdOrderByCreatedAtDesc(productId)
                 .stream()
                 .map(this::mapToReviewResponse)
@@ -107,6 +118,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Override
     public List<ReviewResponse> getUserReviews(Long userId) {
+        log.info("Fetching reviews for userId: {}", userId);
         return reviewRepository.findByUserIdOrderByCreatedAtDesc(userId)
                 .stream()
                 .map(this::mapToReviewResponse)
@@ -131,10 +143,15 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public void deleteReview(Long reviewId, Long userId) {
+        log.info("Deleting review reviewId: {} by userId: {}", reviewId, userId);
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new OrderNotFoundException("Review not found with id: " + reviewId));
+                .orElseThrow(() -> {
+                    log.warn("Review not found with id: {}", reviewId);
+                    return new OrderNotFoundException("Review not found with id: " + reviewId);
+                });
 
         if (!review.getUserId().equals(userId)) {
+            log.warn("Unauthorized review delete attempt: userId {} on reviewId {}", userId, reviewId);
             throw new UnauthorizedException("You can only delete your own reviews");
         }
 
@@ -146,7 +163,7 @@ public class ReviewServiceImpl implements ReviewService {
         try {
             productServiceClient.updateProductRating(productId, averageRating);
         } catch (Exception e) {
-            System.err.println("Failed to update product rating: " + e.getMessage());
+            log.error("Failed to update product rating after review deletion for productId: {}: {}", productId, e.getMessage());
         }
     }
 

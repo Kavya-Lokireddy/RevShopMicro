@@ -11,6 +11,8 @@ import com.revshop.order.exception.UnauthorizedException;
 import com.revshop.order.repository.OrderRepository;
 import com.revshop.order.service.NotificationService;
 import com.revshop.order.service.OrderService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class OrderServiceImpl implements OrderService {
+
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
 
     private final OrderRepository orderRepository;
     private final NotificationService notificationService;
@@ -34,6 +38,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse createOrder(CreateOrderRequest request) {
+        log.info("Creating order for user: {}", request.getUserId());
         Order order = new Order();
         order.setUserId(request.getUserId());
         order.setShippingAddress(request.getShippingAddress());
@@ -48,8 +53,10 @@ public class OrderServiceImpl implements OrderService {
         double calculatedTotalAmount = 0.0;
 
         for (CreateOrderRequest.OrderItemRequest itemRequest : request.getItems()) {
+            log.debug("Fetching product details for productId: {}", itemRequest.getProductId());
             ProductDto product = productServiceClient.getProductById(itemRequest.getProductId());
             if (product == null) {
+                log.error("Product not found with id: {}", itemRequest.getProductId());
                 throw new IllegalStateException("Product not found: " + itemRequest.getProductId());
             }
 
@@ -73,6 +80,7 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(calculatedTotalAmount);
 
         Order savedOrder = orderRepository.save(order);
+        log.info("Order created successfully with id: {} for user: {}, totalAmount: {}", savedOrder.getId(), savedOrder.getUserId(), savedOrder.getTotalAmount());
 
         // Create notification for buyer
         notificationService.createNotification(
@@ -98,13 +106,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse getOrderById(Long orderId) {
+        log.info("Fetching order by id: {}", orderId);
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order not found with id: {}", orderId);
+                    return new OrderNotFoundException("Order not found with id: " + orderId);
+                });
         return mapToOrderResponse(order);
     }
 
     @Override
     public List<OrderResponse> getOrdersByBuyer(Long userId) {
+        log.info("Fetching orders for buyer userId: {}", userId);
         return orderRepository.findByUserIdOrderByOrderDateDesc(userId)
                 .stream()
                 .map(this::mapToOrderResponse)
@@ -113,6 +126,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderResponse> getOrdersBySeller(Long sellerId) {
+        log.info("Fetching orders for seller sellerId: {}", sellerId);
         return orderRepository.findBySellerIdOrderByOrderDateDesc(sellerId)
                 .stream()
                 .map(this::mapToOrderResponse)
@@ -122,12 +136,17 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse updateOrderStatus(Long orderId, OrderStatus status) {
+        log.info("Updating order status for orderId: {} to status: {}", orderId, status);
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order not found for status update, orderId: {}", orderId);
+                    return new OrderNotFoundException("Order not found with id: " + orderId);
+                });
 
         OrderStatus previousStatus = order.getStatus();
         order.setStatus(status);
         Order updatedOrder = orderRepository.save(order);
+        log.info("Order status updated from {} to {} for orderId: {}", previousStatus, status, orderId);
 
         // Create notification based on status
         NotificationType notificationType = getNotificationTypeForStatus(status);
@@ -146,18 +165,25 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public void cancelOrder(Long orderId, Long userId) {
+        log.info("Cancel order request for orderId: {} by userId: {}", orderId, userId);
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + orderId));
+                .orElseThrow(() -> {
+                    log.warn("Order not found for cancellation, orderId: {}", orderId);
+                    return new OrderNotFoundException("Order not found with id: " + orderId);
+                });
 
         if (!order.getUserId().equals(userId)) {
+            log.warn("Unauthorized cancel attempt on orderId: {} by userId: {}", orderId, userId);
             throw new UnauthorizedException("You are not authorized to cancel this order");
         }
 
         if (order.getStatus() == OrderStatus.SHIPPED || order.getStatus() == OrderStatus.DELIVERED) {
+            log.warn("Cannot cancel orderId: {} - current status: {}", orderId, order.getStatus());
             throw new IllegalStateException("Cannot cancel order that is already " + order.getStatus());
         }
 
         order.setStatus(OrderStatus.CANCELLED);
+        log.info("Order cancelled successfully, orderId: {}", orderId);
         orderRepository.save(order);
 
         // Notify buyer
